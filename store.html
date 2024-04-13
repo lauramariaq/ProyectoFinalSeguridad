@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validación de Inventario de Tenis</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="mb-4">Inventario de Tenis</h1>
+    <div id="loginForm">
+      <h2>Iniciar sesión</h2>
+      <div class="form-group">
+        <label for="username">Usuario:</label>
+        <input type="text" class="form-control" id="username" placeholder="Ingrese su nombre de usuario">
+      </div>
+      <div class="form-group">
+        <label for="password">Contraseña:</label>
+        <input type="password" class="form-control" id="password" placeholder="Ingrese su contraseña">
+      </div>
+      <button type="button" class="btn btn-primary" onclick="login()">Iniciar sesión</button>
+    </div>
+    <div id="inventorySection" style="display: none;">
+      <form id="inventoryForm">
+        <div class="form-group">
+          <label for="tenisModel">Modelo de Tenis:</label>
+          <input type="text" class="form-control" id="tenisModel" placeholder="Ingrese el modelo de tenis">
+        </div>
+        <div class="form-group">
+          <label for="tenisQuantity">Cantidad:</label>
+          <input type="number" class="form-control" id="tenisQuantity" placeholder="Ingrese la cantidad">
+        </div>
+        <button type="submit" class="btn btn-primary">Validar</button>
+        <button type="button" class="btn btn-danger ml-2" onclick="logout()">Cerrar sesión</button>
+      </form>
+      <div class="mt-4">
+        <h2>Inventario Registrado</h2>
+        <table id="inventoryTable" class="table">
+          <thead>
+            <tr>
+              <th>Modelo</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryBody">
+            <!-- Aquí se insertarán los datos del inventario -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS y jQuery (Necesario para Bootstrap) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    // Usuario mockeado para el login
+    var mockUser = {
+      username: "admin",
+      password: "admin123"
+    };
+
+    // Función para iniciar sesión
+    function login() {
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+
+      // Hash de la contraseña (en una aplicación real, debería usarse un algoritmo de hashing seguro)
+      var hashedPassword = hashPassword(password);
+
+      if (username === mockUser.username && password === mockUser.password) {
+        // Almacenar estado de autenticación en una cookie
+        document.cookie = "authenticated=true";
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('inventorySection').style.display = 'block';
+      } else {
+        alert('Usuario o contraseña incorrectos.');
+      }
+    }
+
+    // Función para cerrar sesión
+    function logout() {
+      // Eliminar cookie de autenticación
+      document.cookie = "authenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('inventorySection').style.display = 'none';
+    }
+
+    // Verificar si el usuario está autenticado al cargar la página
+    window.onload = function() {
+      var authenticated = document.cookie.includes("authenticated=true");
+      if (authenticated) {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('inventorySection').style.display = 'block';
+      }
+    };
+
+    document.getElementById('inventoryForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Obtenemos los valores del formulario y los sanitizamos
+      var tenisModel = sanitizeInput(document.getElementById('tenisModel').value);
+      var tenisQuantity = parseInt(document.getElementById('tenisQuantity').value);
+
+      // Validamos la cantidad de tenis y el modelo (evitando campos vacíos)
+      if (tenisModel.trim() === '') {
+        alert('Por favor, ingrese el modelo de tenis.');
+      } else if (isNaN(tenisQuantity) || tenisQuantity <= 0) {
+        alert('La cantidad debe ser un número entero mayor que cero.');
+      } else {
+        // Creamos una nueva fila en la tabla con los datos del formulario
+        var newRow = document.createElement('tr');
+        newRow.innerHTML = '<td>' + tenisModel + '</td><td>' + tenisQuantity + '</td>';
+
+        // Agregamos la nueva fila a la tabla
+        document.getElementById('inventoryBody').appendChild(newRow);
+
+        // Limpiamos los campos del formulario
+        document.getElementById('tenisModel').value = '';
+        document.getElementById('tenisQuantity').value = '';
+      }
+    });
+
+    // Función para sanitizar la entrada del usuario para evitar la inyección de código
+    function sanitizeInput(input) {
+      return input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+       // Configuración de encabezados HTTP seguros
+    // // (Agrega encabezados de seguridad en todas las respuestas)
+    // document.addEventListener('DOMContentLoaded', function() {
+    //   var meta = document.createElement('meta');
+    //   meta.httpEquiv = 'Content-Security-Policy';
+    //   meta.content = "default-src 'self'";
+    //   document.getElementsByTagName('head')[0].appendChild(meta);
+    // });
+
+      // Configuración de encabezados HTTP seguros
+    // (Agrega encabezados de seguridad en todas las respuestas)
+    document.addEventListener('DOMContentLoaded', function() {
+      var meta = document.createElement('meta');
+      meta.httpEquiv = 'Content-Security-Policy';
+      meta.content = "default-src 'self'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net; style-src 'self' https://stackpath.bootstrapcdn.com; font-src 'self' https://stackpath.bootstrapcdn.com;";
+      document.getElementsByTagName('head')[0].appendChild(meta);
+    });
+
+    // Función de hash de contraseña simple (no segura, solo para fines demostrativos)
+    function hashPassword(password) {
+      // En una aplicación real, se debe utilizar un algoritmo de hashing seguro (como bcrypt)
+      return password; // Devuelve la contraseña sin hash por simplicidad
+    }
+  </script>
+</body>
+</html>
